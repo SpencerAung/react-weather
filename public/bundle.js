@@ -24936,30 +24936,44 @@
 
 	  getInitialState: function getInitialState() {
 	    return {
-	      location: "Seoul",
-	      temp: 20
+	      isLoading: false
 	    };
 	  },
 	  handleSearch: function handleSearch(location) {
 	    var that = this;
-	    openWeatherMap.getTemp(location).then(function (temp) {
+	    this.setState({ isLoading: true });
+	    openWeatherMap.getTemp(location).then(function (newData) {
 	      that.setState({
-	        location: location,
-	        temp: temp
+	        location: newData.name,
+	        temp: Math.floor(newData.main.temp),
+	        isLoading: false
 	      });
 	    }, function (errorMessage) {
+	      that.setState({
+	        location: null,
+	        temp: null,
+	        isLoading: false
+	      });
 	      alert(errorMessage);
 	    });
-	    // this.setState({
-	    //   location: location,
-	    //   temp: 27
-	    // });
 	  },
 	  render: function render() {
 	    var _state = this.state,
 	        temp = _state.temp,
-	        location = _state.location;
+	        location = _state.location,
+	        isLoading = _state.isLoading;
 
+	    function renderMessage() {
+	      if (isLoading) {
+	        return React.createElement(
+	          'h3',
+	          null,
+	          'Fetching weather...'
+	        );
+	      } else if (temp != null && location != null) {
+	        return React.createElement(WeatherMessage, { temp: temp, location: location });
+	      }
+	    }
 	    return React.createElement(
 	      'div',
 	      null,
@@ -24969,7 +24983,7 @@
 	        'Get Weather'
 	      ),
 	      React.createElement(WeatherForm, { onSearch: this.handleSearch }),
-	      React.createElement(WeatherMessage, { temp: temp, location: location })
+	      renderMessage()
 	    );
 	  }
 	});
@@ -25065,10 +25079,10 @@
 	      if (res.data.cod && res.data.message) {
 	        throw new Error(res.data.message);
 	      } else {
-	        return res.data.main.temp;
+	        return res.data;
 	      }
-	    }, function (res) {
-	      throw new Error(res.data.message);
+	    }, function (err) {
+	      throw new Error(err.response.data.message);
 	    });
 	  }
 	};
