@@ -10,11 +10,16 @@ module.exports = {
     return axios.get(requestUrl).then(function(res) {
       if (res.data.cod && res.data.message) {
         throw new Error(res.data.message);
+        //for newer version of axios
+        // throw new Error(res.response.data.message);
+        // or
+        // throw new Error('Unable to fetch weather for that location.');
       } else {
         return res.data;
       }
     }, function(err) {
       throw new Error(err.response.data.message);
+
     });
   }
 }
